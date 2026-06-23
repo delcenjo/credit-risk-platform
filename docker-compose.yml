@@ -1,0 +1,56 @@
+# Local stack: a one-shot trainer populates a shared volume, the API serves from
+# it, and Prometheus and Grafana provide monitoring.
+
+services:
+  trainer:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["credit-scoring", "train"]
+    environment:
+      CS_ARTIFACTS_DIR: /app/artifacts
+      CS_REGISTRY_DIR: /app/artifacts/registry
+      CS_REFERENCE_PATH: /app/artifacts/reference.json
+    volumes:
+      - artifacts:/app/artifacts
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    depends_on:
+      trainer:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
+    environment:
+      CS_ARTIFACTS_DIR: /app/artifacts
+      CS_REGISTRY_DIR: /app/artifacts/registry
+      CS_REFERENCE_PATH: /app/artifacts/reference.json
+    volumes:
+      - artifacts:/app/artifacts
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+
+volumes:
+  artifacts:
