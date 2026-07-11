@@ -1,0 +1,61 @@
+{
+  "version": "20260623-194901",
+  "trained_at": "2026-06-23T19:49:01.643096+00:00",
+  "algorithm": "gradient_boosting",
+  "threshold": 0.14,
+  "metrics": {
+    "roc_auc": 0.7789,
+    "pr_auc": 0.5546,
+    "brier": 0.1352
+  },
+  "operating_point": {
+    "threshold": 0.14,
+    "tn": 2530,
+    "fp": 2143,
+    "fn": 239,
+    "tp": 1088,
+    "recall": 0.8199,
+    "precision": 0.3367,
+    "cost": 3338.0
+  },
+  "cv": {
+    "logistic_regression": {
+      "cv_roc_auc": 0.7275,
+      "cv_pr_auc": 0.5045
+    },
+    "gradient_boosting": {
+      "cv_roc_auc": 0.7811,
+      "cv_pr_auc": 0.5616
+    }
+  },
+  "features": [
+    "limit_bal",
+    "age",
+    "pay_0",
+    "pay_2",
+    "pay_3",
+    "pay_4",
+    "pay_5",
+    "pay_6",
+    "bill_amt1",
+    "bill_amt2",
+    "bill_amt3",
+    "bill_amt4",
+    "bill_amt5",
+    "bill_amt6",
+    "pay_amt1",
+    "pay_amt2",
+    "pay_amt3",
+    "pay_amt4",
+    "pay_amt5",
+    "pay_amt6",
+    "sex",
+    "education",
+    "marriage"
+  ],
+  "cost": {
+    "false_negative": 5.0,
+    "false_positive": 1.0
+  },
+  "default_rate": 0.2212
+}

@@ -1,0 +1,66 @@
+name: Health
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Run tests
+        id: tests
+        run: |
+          uv run pytest --tb=no -q --junitxml=pytest-report.xml || true
+
+          python3 - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+
+          passed = total = 0
+          try:
+              root = ET.parse("pytest-report.xml").getroot()
+              suite = root.find("testsuite") if root.tag == "testsuites" else root
+              total = int(suite.get("tests", 0))
+              failures = int(suite.get("failures", 0))
+              errors = int(suite.get("errors", 0))
+              skipped = int(suite.get("skipped", 0))
+              passed = max(total - failures - errors - skipped, 0)
+          except (FileNotFoundError, ET.ParseError):
+              pass
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f"passed={passed}\n")
+              fh.write(f"total={total}\n")
+          PY
+
+      - name: Export health snapshot
+        run: |
+          uv run python scripts/export_health.py \
+            --tests-passed "${{ steps.tests.outputs.passed }}" \
+            --tests-total "${{ steps.tests.outputs.total }}"
+
+      - name: Commit health snapshot
+        run: |
+          git config user.name "delcenjo"
+          git config user.email "jdelriocenteno@gmail.com"
+          if ! git diff --quiet -- health/latest.json; then
+            git add health/latest.json
+            git commit -m "Update health snapshot"
+            git push
+          else
+            echo "health/latest.json unchanged, nothing to commit"
+          fi

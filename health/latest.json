@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-07-11T12:53:56Z",
+  "metrics": {
+    "brier": 0.1352,
+    "pr_auc": 0.5546,
+    "roc_auc": 0.7789,
+    "threshold": 0.14
+  },
+  "model_version": "20260623-194901",
+  "tests": {
+    "passed": 16,
+    "total": 16
+  }
+}
