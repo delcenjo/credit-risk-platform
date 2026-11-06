@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06T05:39:46Z",
+  "generated_at": "2026-11-06T19:01:43Z",
   "metrics": {
     "brier": 0.1352,
     "pr_auc": 0.5546,
